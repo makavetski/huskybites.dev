@@ -2,9 +2,9 @@
 // TODO: fill in your real links before publishing.
 const contacts = [
   { label: 'GitHub', href: 'https://github.com/makavetski' },
-  { label: 'Telegram', href: '' }, // e.g. https://t.me/your_username
-  { label: 'LinkedIn', href: '' }, // e.g. https://www.linkedin.com/in/your-profile
-  { label: 'Email', href: '' }, // e.g. mailto:you@example.com
+  { label: 'Telegram', href: 'https://t.me/MlXAKER' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/mikhail-makavetski-592062233/' },
+  { label: 'Email', href: 'mailto:mikhail.makavetski@gmail.com' },
 ].filter((c) => c.href)
 
 const stack = ['PHP', 'Laravel', 'Vue.js', 'Nuxt', 'MySQL', 'REST API']
@@ -30,8 +30,8 @@ const stack = ['PHP', 'Laravel', 'Vue.js', 'Nuxt', 'MySQL', 'REST API']
           v-for="c in contacts"
           :key="c.label"
           :href="c.href"
-          target="_blank"
-          rel="noopener"
+          :target="c.href.startsWith('http') ? '_blank' : undefined"
+          :rel="c.href.startsWith('http') ? 'noopener' : undefined"
         >{{ c.label }}</a>
       </nav>
     </section>

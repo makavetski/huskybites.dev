@@ -6,6 +6,14 @@ export default defineNuxtConfig({
   // Static site: `npm run generate` -> .output/public (deployed to GitHub Pages)
   ssr: true,
 
+  runtimeConfig: {
+    public: {
+      // The bot (Cloudflare Worker) that counts page views (app/plugins/stats.client.ts) and QR scans (public/car).
+      // Also in public/car/index.html (STATS_URL).
+      statsUrl: 'https://huskybites-jobs-bot.huskybitesdev.workers.dev',
+    },
+  },
+
   app: {
     head: {
       htmlAttrs: { lang: 'en' },

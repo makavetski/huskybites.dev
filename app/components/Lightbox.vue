@@ -211,7 +211,8 @@ onBeforeUnmount(() => {
 .lb-frame.zoomed img { cursor: grab; }
 .lb-frame img.hidden { opacity: 0; }
 /* the loader on the dark overlay: black Archie with a light outline */
-.lb-loading { position: absolute; inset: 0; --husky-outline: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7)); --snow-strong: #ffffff; --line: rgba(255, 255, 255, 0.22); }
+.lb-loading { position: absolute; inset: 0; --husky-outline: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7)); --snow-strong: #ffffff; --line: rgba(255, 255, 255, 0.22);
+  --scene-far: #262c33; --scene-pine: #3c5a47; --scene-pine-snow: #cfd8de; --scene-snow: #1f242a; }
 figcaption { color: #e9eef2; font-size: 15px; text-align: center; display: flex; flex-direction: column; gap: 2px; }
 .lb-meta { color: #9aa5b0; font-size: 13px; }
 .lb-btn { position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.12);

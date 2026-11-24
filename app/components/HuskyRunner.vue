@@ -1,12 +1,43 @@
 <script setup lang="ts">
 // A small husky running on the spot: the loader for pictures that are still on their way.
 defineProps<{ label?: string }>()
+// A winter forest behind Archie, two layers that scroll at different speeds; each layer is drawn twice, 220 apart, to loop.
+const W = 220
+const pines = [
+  { x: -38, h: 30 }, { x: -12, h: 40 }, { x: 14, h: 26 }, { x: 44, h: 44 }, { x: 70, h: 32 },
+  { x: 98, h: 38 }, { x: 126, h: 28 }, { x: 150, h: 42 },
+]
+// a pine: three tiers on a short trunk, h = height, standing on y = 60
+const pine = (x: number, h: number) => {
+  const w = h * 0.42
+  const y = 60 - h
+  return `M${x} ${y} L${x - w * 0.55} ${y + h * 0.36} H${x - w * 0.3} L${x - w * 0.8} ${y + h * 0.66} H${x - w * 0.45}
+    L${x - w} ${y + h * 0.92} H${x + w} L${x + w * 0.45} ${y + h * 0.66} H${x + w * 0.8} L${x + w * 0.3} ${y + h * 0.36} H${x + w * 0.55} Z`
+}
+// snow lying on the top and on each tier of a pine
+const snow = (x: number, h: number) => {
+  const w = h * 0.42
+  const y = 60 - h
+  const band = (t: number, half: number, out: number, drop: number) =>
+    `M${x - w * half} ${y + h * t} H${x + w * half} L${x + w * out} ${y + h * (t + drop)} Q${x} ${y + h * (t + drop * 0.4)} ${x - w * out} ${y + h * (t + drop)} Z`
+  return `M${x} ${y - 0.5} L${x - w * 0.24} ${y + h * 0.15} Q${x} ${y + h * 0.1} ${x + w * 0.24} ${y + h * 0.15} Z ` +
+    band(0.36, 0.3, 0.44, 0.07) + ' ' + band(0.66, 0.45, 0.62, 0.07)
+}
+const forest = [0, W].flatMap((dx) => pines.map((p) => pine(p.x + dx, p.h)))
+const forestSnow = [0, W].flatMap((dx) => pines.map((p) => snow(p.x + dx, p.h)))
+const hills = [0, W].map((dx) => `M${-60 + dx} 60 Q${-20 + dx} 30 ${25 + dx} 48 T${110 + dx} 42 T${160 + dx} 60 Z`)
 </script>
 
 <template>
   <span class="runner" role="status" :aria-label="label">
-    <svg viewBox="0 0 120 70" aria-hidden="true">
-      <g class="ground"><path d="M0 64 H22 M34 64 H58 M70 64 H96 M108 64 H132" /></g>
+    <svg viewBox="-50 -16 220 86" aria-hidden="true">
+      <g class="hills"><path v-for="(d, k) in hills" :key="k" :d="d" /></g>
+      <g class="forest">
+        <path v-for="(d, k) in forest" :key="k" :d="d" />
+        <path v-for="(d, k) in forestSnow" :key="'s' + k" class="pine-snow" :d="d" />
+      </g>
+      <rect class="snowfield" x="-60" y="58" width="240" height="14" />
+      <g class="ground"><path d="M-50 64 H-28 M-16 64 H8 M20 64 H46 M58 64 H82 M94 64 H118 M130 64 H154 M166 64 H190" /></g>
       <g class="dog">
         <!-- Archie from the side: dark back and cap, white legs, chest and muzzle, brown eyes, tail curled over the back -->
         <rect class="leg far fl" x="74" y="38" width="6" height="20" rx="3" />
@@ -36,7 +67,17 @@ defineProps<{ label?: string }>()
 
 <style scoped>
 .runner { display: grid; place-items: center; width: 100%; height: 100%; color: var(--ink); }
-svg { width: min(96px, 48%); height: auto; overflow: visible; }
+svg { width: min(180px, 86%); height: auto; overflow: hidden;
+  /* the scene fades out at the sides instead of ending with a hard edge */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); }
+.hills path { fill: var(--scene-far, #e6ecf1); }
+.forest path { fill: var(--scene-pine, #7fa58c); }
+.forest .pine-snow { fill: var(--scene-pine-snow, #ffffff); }
+.snowfield { fill: var(--scene-snow, #f1f5f8); }
+.hills { animation: run-far 9s linear infinite; }
+.forest { animation: run-far 3.2s linear infinite; }
+@keyframes run-far { from { transform: translateX(0); } to { transform: translateX(-220px); } }
 .coat { fill: #23282e; } /* Archie is black */
 /* a soft light outline around the whole dog where the background is dark (set by the page, or by the dark theme below) */
 .dog { filter: var(--husky-outline, none); }
@@ -49,7 +90,7 @@ svg { width: min(96px, 48%); height: auto; overflow: visible; }
 .nose { fill: #14181c; }
 .ground path { stroke: var(--line); stroke-width: 3; stroke-linecap: round; fill: none; }
 /* on dark backgrounds Archie stays black and gets a thin light outline, so he does not vanish */
-@media (prefers-color-scheme: dark) { .runner { --husky-outline: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7)); } .far { fill: #6b7580; } .nl { stroke: #6b7580; } }
+@media (prefers-color-scheme: dark) { .runner { --husky-outline: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7)); --scene-far: #2b323a; --scene-pine: #3f5f4b; --scene-pine-snow: #c9d3da; --scene-snow: #262c33; } .far { fill: #6b7580; } .nl { stroke: #6b7580; } }
 /* gallop: legs swing in pairs, the body bobs, the ground runs back */
 .dog { animation: bob 420ms ease-in-out infinite; }
 .leg { transform-box: fill-box; transform-origin: 50% 0; }
@@ -62,5 +103,5 @@ svg { width: min(96px, 48%); height: auto; overflow: visible; }
 @keyframes pant { 0%, 100% { transform: none; } 50% { transform: scaleY(1.3); } }
 @keyframes wag { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-14deg); } }
 @keyframes run { from { transform: translateX(0); } to { transform: translateX(-36px); } }
-@media (prefers-reduced-motion: reduce) { .dog, .leg, .tail, .tongue, .ground { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .dog, .leg, .tail, .tongue, .ground, .hills, .forest { animation: none; } }
 </style>

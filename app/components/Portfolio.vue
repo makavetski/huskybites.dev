@@ -4,6 +4,16 @@ import { contacts, en, ru, type Lang } from '~/data/profile'
 const props = defineProps<{ lang: Lang }>()
 const t = computed(() => (props.lang === 'ru' ? ru : en))
 const year = new Date().getFullYear()
+// "Show the loaders": ?loaders in the address or the footer button; the button works without a reload.
+const showLoaders = useLoaders()
+onMounted(() => { if (new URLSearchParams(location.search).has('loaders')) showLoaders.value = true })
+function toggleLoaders() {
+  showLoaders.value = !showLoaders.value
+  const url = new URL(location.href)
+  if (showLoaders.value) url.searchParams.set('loaders', '')
+  else url.searchParams.delete('loaders')
+  history.replaceState(null, '', url.toString().replace('loaders=', 'loaders'))
+}
 const other = computed(() => (props.lang === 'ru' ? '/en' : '/'))
 const site = 'https://huskybites.dev'
 
@@ -119,7 +129,7 @@ function cvClick() {
             <LoadImg v-if="photoOk" src="/photo.webp" :alt="t.photoAlt" width="440" height="440" @error="photoOk = false">
               <!-- while the photo loads, the circle under the ears is a husky face that blinks -->
               <template #loader>
-                <svg class="face" viewBox="0 0 40 40" aria-hidden="true">
+                <svg class="face" viewBox="5 4 30 34" aria-hidden="true">
                   <path d="M6.5 25 C7.5 18 12.5 15 16.5 16 L20 21.5 L23.5 16 C27.5 15 32.5 18 33.5 25 C32.5 33 26.5 37 20 37 C13.5 37 7.5 33 6.5 25 Z" class="face-mask" />
                   <rect x="19.3" y="6" width="1.4" height="16" rx="0.7" class="face-mask" />
                   <circle cx="14.3" cy="23.6" r="2.1" class="face-eye" /><circle cx="25.7" cy="23.6" r="2.1" class="face-eye" />
@@ -220,6 +230,9 @@ function cvClick() {
       <div class="footer-text">
         <strong>{{ t.footer }}</strong>
         <span>{{ t.footerNote }}</span>
+        <button type="button" class="loaders-btn" :aria-pressed="showLoaders" @click="toggleLoaders">
+          {{ showLoaders ? t.loadersButton.hide : t.loadersButton.show }}
+        </button>
       </div>
       <span class="footer-copy">© {{ year }} {{ t.name }}</span>
     </footer>
@@ -291,7 +304,7 @@ h1 { font-family: var(--display); font-weight: 700; font-size: clamp(38px, 6.4vw
   border: 6px solid var(--ice); display: grid; place-items: center; }
 .photo .li { width: 100%; height: 100%; }
 .photo :deep(img) { width: 100%; height: 100%; object-fit: cover; display: block; }
-.face { width: 62%; height: auto; }
+.face { width: 66%; height: auto; margin-top: 4%; }
 .face-mask { fill: var(--snow-strong); }
 .face-eye { fill: #b8742a; transform-box: fill-box; transform-origin: center; animation: blink 3.2s ease-in-out infinite; }
 .face-nose { fill: #2a2226; }
@@ -350,6 +363,10 @@ html.js .hello:has(.li:not(.ready)) .hello-frame { opacity: 0; } /* the text app
 .footer-sticker { display: block; width: auto; height: 76px; flex: none; } /* die-cut sticker, transparent background */
 .footer-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .footer-text strong { color: var(--ink); font-weight: 600; font-size: 15px; }
+.loaders-btn { align-self: flex-start; margin-top: 6px; padding: 0; border: 0; background: none; font: inherit; font-size: 14px;
+  color: var(--ice-deep); cursor: pointer; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.loaders-btn:hover { color: var(--ink); }
+.loaders-btn:focus-visible { outline: 3px solid var(--ice); outline-offset: 3px; border-radius: 4px; }
 @media (max-width: 560px) {
   .footer { flex-wrap: wrap; gap: 12px 14px; }
   .footer-sticker { height: 58px; }

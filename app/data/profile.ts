@@ -35,6 +35,7 @@ export interface Profile {
   contactsSticker: { src: string; alt: string; frame: string }
   footer: string
   footerNote: string
+  loadersButton: { show: string; hide: string }
   photoAlt: string
   archie: { title: string; text: string; review: { src: string; alt: string; caption: string }; photos: { src: string; full: string; alt: string }[] }
   life: { title: string; photos: { src: string; full: string; alt: string; caption: string }[] }
@@ -160,6 +161,7 @@ export const ru: Profile = {
   },
   footer: 'Сайт под присмотром хаски.',
   footerNote: 'Арчи проверяет каждый коммит.',
+  loadersButton: { show: 'Посмотреть, как Арчи бегает', hide: 'Вернуть фото' },
   photoAlt: 'Михаил Маковецкий',
   archie: {
     title: 'Арчи',
@@ -181,7 +183,7 @@ export const ru: Profile = {
       { src: '/life-fire.webp', full: '/life-fire-full.webp', alt: 'Костёр в мангале вечером', caption: 'Вечерний костёр на летней встрече' },
     ],
   },
-  lightbox: { close: 'Закрыть', prev: 'Предыдущее фото', next: 'Следующее фото', hint: 'нажмите дважды, чтобы приблизить', open: 'Открыть фото' },
+  lightbox: { close: 'Закрыть', prev: 'Предыдущее фото', next: 'Следующее фото', hint: 'дважды нажмите или сведите пальцы, чтобы приблизить', open: 'Открыть фото' },
 }
 
 export const en: Profile = {
@@ -285,6 +287,7 @@ export const en: Profile = {
   },
   footer: 'This site is supervised by a husky.',
   footerNote: 'Archie reviews every commit.',
+  loadersButton: { show: 'Watch Archie run', hide: 'Bring the photos back' },
   photoAlt: 'Mikhail Makavetski',
   archie: {
     title: 'Archie',
@@ -306,5 +309,5 @@ export const en: Profile = {
       { src: '/life-fire.webp', full: '/life-fire-full.webp', alt: 'An evening fire in a grill', caption: 'Evening fire at a summer meetup' },
     ],
   },
-  lightbox: { close: 'Close', prev: 'Previous photo', next: 'Next photo', hint: 'double tap or click to zoom', open: 'Open photo' },
+  lightbox: { close: 'Close', prev: 'Previous photo', next: 'Next photo', hint: 'double tap, pinch or scroll to zoom', open: 'Open photo' },
 }

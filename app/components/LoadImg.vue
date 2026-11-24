@@ -6,10 +6,10 @@ const props = defineProps<{ src: string; alt: string; width?: number | string; h
 const emit = defineEmits<{ error: []; load: [] }>()
 const img = ref<HTMLImageElement | null>(null)
 const ready = ref(false)
-// huskybites.dev/?loaders keeps every loader on screen: to look at them without slowing the network down.
-let hold = false
+// The "show the loaders" mode (?loaders or the footer button) keeps the loader on screen.
+const hold = useLoaders()
 function done() {
-  if (hold) return
+  if (hold.value) return
   ready.value = true
   emit('load')
 }
@@ -23,11 +23,9 @@ function check() {
     else emit('error')
   })
 }
-onMounted(() => {
-  hold = new URLSearchParams(location.search).has('loaders')
-  check()
-})
+onMounted(check)
 watch(() => props.src, check)
+watch(hold, (on) => (on ? (ready.value = false) : check()))
 </script>
 
 <template>

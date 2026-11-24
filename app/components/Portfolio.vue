@@ -41,7 +41,11 @@ useHead(() => ({
     { property: 'og:title', content: t.value.title },
     { property: 'og:description', content: t.value.description },
     { property: 'og:url', content: site + (props.lang === 'ru' ? '/' : '/en') },
-    { property: 'og:image', content: `${site}/og.png` },
+    // link preview picture (Telegram, LinkedIn…): photo with the husky ears, in the page's language
+    { property: 'og:image', content: `${site}/${props.lang === 'ru' ? 'og-ru' : 'og'}.png` },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' },
+    { property: 'og:image:alt', content: t.value.title },
     { property: 'og:locale', content: props.lang === 'ru' ? 'ru_RU' : 'en_US' },
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'theme-color', content: '#2B3138' },
@@ -171,7 +175,7 @@ function cvClick() {
         <p class="note">{{ t.languages }}</p>
 
         <h2 class="sub">{{ t.educationTitle }}</h2>
-        <p class="edu"><span class="period">{{ t.education.period }}</span> {{ t.education.text }}</p>
+        <p class="edu"><span class="period">{{ t.education.period }}</span><span>{{ t.education.text }}</span></p>
       </section>
 
       <section id="contacts" class="block contacts">
@@ -336,8 +340,8 @@ h3 { font-size: 20px; margin: 0; color: var(--ink); }
 .skills dt { color: var(--muted); }
 .skills dd { margin: 0; color: var(--ink); max-width: 72ch; }
 .note { color: var(--muted); margin: 22px 0 0; }
-.edu { margin: 0; color: var(--ink); }
-.edu .period { display: inline-block; min-width: 190px; margin-right: 32px; }
+/* same columns as the experience and skills: the text wraps in its own column, not under the years */
+.edu { margin: 0; color: var(--ink); display: grid; grid-template-columns: 190px 1fr; gap: 32px; }
 
 .contacts { display: grid; grid-template-columns: 1fr minmax(280px, 460px); gap: 32px; align-items: center; }
 .contacts .note { margin: -12px 0 18px; }
@@ -408,7 +412,7 @@ a:focus-visible { outline: 3px solid var(--ice); outline-offset: 3px; border-rad
   .job, .skills { grid-template-columns: 1fr; gap: 6px; }
   .skills dd { margin-bottom: 10px; }
   .job-body { padding-left: 20px; }
-  .edu .period { min-width: 0; display: block; margin-bottom: 4px; }
+  .edu { grid-template-columns: 1fr; gap: 4px; }
   .nav { gap: 14px; }
   .nav a:not(.lang) { display: none; }
 }

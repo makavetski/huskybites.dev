@@ -7,7 +7,7 @@ const year = new Date().getFullYear()
 const other = computed(() => (props.lang === 'ru' ? '/en' : '/'))
 const site = 'https://huskybites.dev'
 
-// Photo: put a square photo to public/photo.jpg; until then the initials are shown.
+// Photo: public/photo.webp (a square crop of photo.jpg); if it is missing, the initials are shown.
 const photoOk = ref(true)
 // Header logo: Archie in glasses (public/logo-archie.png, cut from the sticker picture).
 // Footer: footer-archie.webp (Gemini sticker, cut out). footer-me.webp is a spare sticker, not used now.
@@ -62,7 +62,7 @@ useHead(() => ({
 const statsUrl = useRuntimeConfig().public.statsUrl as string
 function cvClick() {
   try {
-    navigator.sendBeacon?.(`${statsUrl}/hit`, JSON.stringify({ path: '/cv.pdf', ref: '', src: `site-${props.lang}` }))
+    navigator.sendBeacon?.(`${statsUrl}/hit`, JSON.stringify({ path: t.value.cta.cvFile, ref: '', src: `site-${props.lang}` }))
   } catch { /* statistics are optional */ }
 }
 </script>
@@ -73,10 +73,17 @@ function cvClick() {
       <a class="brand" :href="lang === 'ru' ? '/' : '/en'" aria-label="HuskyBites">
         <img v-if="stickerOk" class="brand-sticker" src="/logo-archie.png" alt="" width="44" height="44" @error="stickerOk = false">
         <svg v-else class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
-          <path d="M6 18 L10 2 L19 12 Z" class="ear" /><path d="M34 18 L30 2 L21 12 Z" class="ear" />
-          <circle cx="20" cy="23" r="15" class="head" />
-          <path d="M20 12 C13 17 9 22 10 30 C14 36 26 36 30 30 C31 22 27 17 20 12 Z" class="mask" />
-          <circle cx="15" cy="23" r="2.2" class="eye" /><circle cx="25" cy="23" r="2.2" class="eye" />
+          <path d="M5 19 L9 2 L18 11 Z" class="ear"/>
+          <path d="M35 19 L31 2 L22 11 Z" class="ear"/>
+          <path d="M8.5 15 L10 6 L15 11 Z" class="ear-in"/>
+          <path d="M31.5 15 L30 6 L25 11 Z" class="ear-in"/>
+          <circle cx="20" cy="22" r="15" class="head"/>
+          <path d="M6.5 25 C7.5 18 12.5 15 16.5 16 L20 21.5 L23.5 16 C27.5 15 32.5 18 33.5 25 C32.5 33 26.5 37 20 37 C13.5 37 7.5 33 6.5 25 Z" class="mask"/>
+          <rect x="19.3" y="8" width="1.4" height="14" rx="0.7" class="mask"/>
+          <circle cx="14.3" cy="23.6" r="2.1" class="eye"/>
+          <circle cx="25.7" cy="23.6" r="2.1" class="eye"/>
+          <ellipse cx="20" cy="29.6" rx="2.6" ry="1.9" class="nose"/>
+          <path d="M18.2 32.4 C18.2 36.4 21.8 36.4 21.8 32.4 Z" class="tongue"/>
         </svg>
         <span>HuskyBites</span>
       </a>
@@ -96,7 +103,7 @@ function cvClick() {
           <p class="lead">{{ t.lead }}</p>
           <div class="actions">
             <a class="btn primary" :href="contacts.telegram" target="_blank" rel="noopener">{{ t.cta.telegram }}</a>
-            <a class="btn" href="/cv.pdf" target="_blank" rel="noopener" @click="cvClick">
+            <a class="btn" :href="t.cta.cvFile" target="_blank" rel="noopener" @click="cvClick">
               {{ t.cta.cv }} <small>{{ t.cta.cvNote }}</small>
             </a>
           </div>
@@ -109,7 +116,18 @@ function cvClick() {
             <g class="ear-r"><path d="M262 140 L228 0 L148 92 Z" class="ear" /><path d="M238 118 L222 36 L172 92 Z" class="ear-in" /></g>
           </svg>
           <div class="photo">
-            <img v-if="photoOk" src="/photo.jpg" :alt="t.photoAlt" width="440" height="440" @error="photoOk = false">
+            <LoadImg v-if="photoOk" src="/photo.webp" :alt="t.photoAlt" width="440" height="440" @error="photoOk = false">
+              <!-- while the photo loads, the circle under the ears is a husky face that blinks -->
+              <template #loader>
+                <svg class="face" viewBox="0 0 40 40" aria-hidden="true">
+                  <path d="M6.5 25 C7.5 18 12.5 15 16.5 16 L20 21.5 L23.5 16 C27.5 15 32.5 18 33.5 25 C32.5 33 26.5 37 20 37 C13.5 37 7.5 33 6.5 25 Z" class="face-mask" />
+                  <rect x="19.3" y="6" width="1.4" height="16" rx="0.7" class="face-mask" />
+                  <circle cx="14.3" cy="23.6" r="2.1" class="face-eye" /><circle cx="25.7" cy="23.6" r="2.1" class="face-eye" />
+                  <ellipse cx="20" cy="29.6" rx="2.6" ry="1.9" class="face-nose" />
+                  <path d="M18.2 32.4 C18.2 36.4 21.8 36.4 21.8 32.4 Z" class="face-tongue" />
+                </svg>
+              </template>
+            </LoadImg>
             <span v-else class="initials">{{ initials }}</span>
           </div>
         </div>
@@ -155,12 +173,12 @@ function cvClick() {
             <li><a :href="contacts.telegram" target="_blank" rel="noopener">Telegram</a></li>
             <li><a :href="contacts.linkedin" target="_blank" rel="noopener">LinkedIn</a></li>
             <li><a :href="contacts.github" target="_blank" rel="noopener">GitHub</a></li>
-            <li><a href="/cv.pdf" target="_blank" rel="noopener" @click="cvClick">CV (PDF)</a></li>
+            <li><a :href="t.cta.cvFile" target="_blank" rel="noopener" @click="cvClick">CV (PDF)</a></li>
           </ul>
         </div>
         <!-- the text in the frame is real text: it follows the language of the page -->
         <figure class="hello">
-          <img :src="t.contactsSticker.src" :alt="t.contactsSticker.alt" loading="lazy" width="1100" height="779">
+          <LoadImg :src="t.contactsSticker.src" :alt="t.contactsSticker.alt" lazy width="1100" height="779" />
           <figcaption class="hello-frame" aria-hidden="true">{{ t.contactsSticker.frame }}</figcaption>
         </figure>
       </section>
@@ -171,14 +189,14 @@ function cvClick() {
             <p class="archie-text">{{ t.archie.text }}</p>
           </div>
           <figure class="review">
-            <img :src="t.archie.review.src" :alt="t.archie.review.alt" loading="lazy" width="1100" height="834">
+            <LoadImg :src="t.archie.review.src" :alt="t.archie.review.alt" lazy width="1100" height="834" />
           </figure>
         </div>
         <div class="archie-photos">
           <template v-for="p in t.archie.photos" :key="p.src">
             <button v-if="archieOk[p.src] !== false" class="tile" type="button" :aria-label="`${t.lightbox.open}: ${p.alt}`"
               @click="openPhotos(t.archie.photos.filter((x) => archieOk[x.src] !== false), t.archie.photos.filter((x) => archieOk[x.src] !== false).indexOf(p))">
-              <img :src="p.src" :alt="p.alt" loading="lazy" width="720" height="720" @error="archieOk[p.src] = false">
+              <LoadImg :src="p.src" :alt="p.alt" lazy width="480" height="480" @error="archieOk[p.src] = false" />
             </button>
           </template>
         </div>
@@ -187,7 +205,7 @@ function cvClick() {
         <div class="life">
           <figure v-for="(p, n) in t.life.photos" :key="p.src">
             <button class="tile" type="button" :aria-label="`${t.lightbox.open}: ${p.alt}`" @click="openPhotos(t.life.photos, n)">
-              <img :src="p.src" :alt="p.alt" loading="lazy" width="720" height="720">
+              <LoadImg :src="p.src" :alt="p.alt" lazy width="480" height="480" />
             </button>
             <figcaption>{{ p.caption }}</figcaption>
           </figure>
@@ -218,8 +236,11 @@ function cvClick() {
 .brand-mark { width: 30px; height: 30px; }
 .brand-sticker { width: 40px; height: 40px; border-radius: 50%; display: block; box-shadow: 0 0 0 2px var(--ice); }
 .brand-mark .ear, .brand-mark .head { fill: var(--coat); }
+.brand-mark .ear-in { fill: #e8a4a6; }
+.brand-mark .nose { fill: #2a2226; }
+.brand-mark .tongue { fill: #e5848f; }
 .brand-mark .mask { fill: var(--snow-strong); }
-.brand-mark .eye { fill: var(--ice); }
+.brand-mark .eye { fill: #b8742a; } /* Archie has brown eyes */
 .nav { display: flex; align-items: center; gap: 22px; font-size: 15px; }
 .nav a { color: var(--muted); text-decoration: none; }
 .nav a:hover { color: var(--ink); }
@@ -245,7 +266,7 @@ h1 { font-family: var(--display); font-weight: 700; font-size: clamp(38px, 6.4vw
 .portrait { position: relative; width: 300px; padding-top: 74px; justify-self: end; }
 .ears { position: absolute; top: 0; left: 10px; width: 280px; height: 140px; overflow: visible; }
 .ears .ear { fill: var(--coat); }
-.ears .ear-in { fill: var(--fur); }
+.ears .ear-in { fill: #e8a4a6; } /* pink inside, like Archie's */
 /* ears prick up on load, then twitch now and then like a real dog's; left and right on different rhythms */
 .ear-l { transform-origin: 75px 120px;
   animation: prick-l 700ms cubic-bezier(.2, .9, .3, 1.2) 250ms both, twitch-l 3.7s ease-in-out 1.6s infinite; }
@@ -268,7 +289,15 @@ h1 { font-family: var(--display); font-weight: 700; font-size: clamp(38px, 6.4vw
 @keyframes prick-r { from { transform: rotate(28deg) translateY(14px); } to { transform: none; } }
 .photo { position: relative; width: 300px; height: 300px; border-radius: 50%; overflow: hidden; background: var(--coat);
   border: 6px solid var(--ice); display: grid; place-items: center; }
-.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo .li { width: 100%; height: 100%; }
+.photo :deep(img) { width: 100%; height: 100%; object-fit: cover; display: block; }
+.face { width: 62%; height: auto; }
+.face-mask { fill: var(--snow-strong); }
+.face-eye { fill: #b8742a; transform-box: fill-box; transform-origin: center; animation: blink 3.2s ease-in-out infinite; }
+.face-nose { fill: #2a2226; }
+.face-tongue { fill: #e5848f; transform-box: fill-box; transform-origin: 50% 0; animation: pant 900ms ease-in-out infinite; }
+@keyframes pant { 0%, 100% { transform: none; } 50% { transform: scaleY(1.25); } }
+@keyframes blink { 0%, 90%, 100% { transform: none; } 94% { transform: scaleY(0.1); } }
 .initials { font-family: var(--display); font-weight: 700; font-size: 84px; color: var(--on-coat); letter-spacing: -0.03em; }
 
 /* ---------- sections ---------- */
@@ -300,11 +329,13 @@ h3 { font-size: 20px; margin: 0; color: var(--ink); }
 .contacts { display: grid; grid-template-columns: 1fr minmax(280px, 460px); gap: 32px; align-items: center; }
 .contacts .note { margin: -12px 0 18px; }
 .hello { position: relative; margin: 0; container-type: inline-size; }
-.hello img { width: 100%; height: auto; display: block; } /* a die-cut sticker: transparent around the white outline */
-/* the empty frame in the picture: left 31.6%, top 45.1%, 33.6% × 43.4% of the image */
-.hello-frame { position: absolute; left: 31.6%; top: 45.1%; width: 33.6%; height: 43.4%; display: grid; place-items: center;
-  padding: 0 4%; text-align: center; font-family: var(--display); font-weight: 700; font-size: 4.6cqw; line-height: 1.15;
-  color: #2b3138; letter-spacing: -0.01em; }
+.hello :deep(img) { width: 100%; height: auto; display: block; }
+html.js .hello:has(.li:not(.ready)) .hello-frame { opacity: 0; } /* the text appears together with the picture */ /* a die-cut sticker: transparent around the white outline */
+/* the white board inside the wooden frame, measured on the picture: x 345–718, y 349–692 of 1100 × 779 */
+.hello-frame { position: absolute; left: 31.4%; top: 44.8%; width: 33.9%; height: 44%; display: grid; place-items: center;
+  padding: 0 2.5cqw; text-align: center; text-wrap: balance; font-family: var(--display); font-weight: 700;
+  font-size: 3.8cqw; /* Unbounded is wide: the longest word ("проектам") must fit, or it sticks out to the right */
+  line-height: 1.2; color: #2b3138; letter-spacing: -0.01em; }
 @media (max-width: 820px) { .contacts { grid-template-columns: 1fr; } }
 .email { font-weight: 600; font-size: clamp(18px, 2.2vw, 24px); color: var(--ink); white-space: nowrap;
   text-decoration: none; border-bottom: 3px solid var(--ice); }
@@ -329,17 +360,18 @@ h3 { font-size: 20px; margin: 0; color: var(--ink); }
 .archie-head .review { order: -1; } /* picture on the left: the contacts above have theirs on the right */
 .archie-text { color: var(--muted); max-width: 46ch; margin: -12px 0 0; }
 .review { margin: 0; }
-.review img { width: 100%; height: auto; display: block; } /* die-cut sticker with a transparent background */
+.review :deep(img) { width: 100%; height: auto; display: block; } /* die-cut sticker with a transparent background */
 .review figcaption { margin-top: 8px; color: var(--muted); font-size: 14px; text-align: center; }
 @media (max-width: 820px) { .archie-head { grid-template-columns: 1fr; gap: 18px; } .archie-head .review { order: 0; } }
 .archie-photos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.archie-photos img, .life img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 18px; display: block;
+.archie-photos :deep(img), .life :deep(img) { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 18px; display: block;
   border: 4px solid var(--paper); box-shadow: 0 0 0 1.5px var(--line); }
 .life-title { margin: 40px 0 16px; font-family: var(--display); font-weight: 600; font-size: 20px; }
 .life { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .tile { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: 18px; }
-.tile img { transition: transform 200ms ease; }
-.tile:hover img { transform: scale(1.02); }
+.tile :deep(img) { transition: transform 200ms ease, opacity 350ms ease; }
+.tile .li { border-radius: 18px; background: var(--paper); } /* the running husky shows on this while the photo loads */
+.tile:hover :deep(img) { transform: scale(1.02); }
 .tile:focus-visible { outline: 3px solid var(--ice); outline-offset: 3px; }
 .life figure { margin: 0; }
 .life figcaption { margin-top: 8px; color: var(--muted); font-size: 14px; }
@@ -363,5 +395,5 @@ a:focus-visible { outline: 3px solid var(--ice); outline-offset: 3px; border-rad
   .nav { gap: 14px; }
   .nav a:not(.lang) { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { .ear-l, .ear-r { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ear-l, .ear-r, .face-eye, .face-tongue { animation: none; } }
 </style>

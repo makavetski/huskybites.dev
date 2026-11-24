@@ -65,12 +65,23 @@ function key(e: KeyboardEvent) {
   else if (e.key === 'ArrowRight') go(1)
   else if (e.key === 'ArrowLeft') go(-1)
 }
+// The big photo fades in when it has loaded; until then a husky runs in its place.
+const loaded = ref(false)
+const imgEl = ref<HTMLImageElement | null>(null)
+const hold = typeof location !== 'undefined' && new URLSearchParams(location.search).has('loaders') // see LoadImg
+function checkLoaded() {
+  loaded.value = false
+  if (hold) return
+  nextTick(() => { if (imgEl.value?.complete && imgEl.value.naturalWidth) loaded.value = true })
+}
+watch(() => photo.value.full, checkLoaded)
 let overflow = ''
 onMounted(() => {
   window.addEventListener('keydown', key)
   overflow = document.body.style.overflow
   document.body.style.overflow = 'hidden'
   closeBtn.value?.focus()
+  checkLoaded()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', key)
@@ -87,8 +98,12 @@ onBeforeUnmount(() => {
 
       <figure class="lb-figure" @click.self="emit('close')">
         <div class="lb-frame" :class="{ zoomed }">
+          <HuskyRunner v-if="!loaded" class="lb-loading" />
           <img
+            ref="imgEl"
             :key="photo.full"
+            :class="{ hidden: !loaded }"
+            @load="loaded = !hold"
             :src="photo.full"
             :alt="photo.alt"
             draggable="false"
@@ -118,6 +133,11 @@ onBeforeUnmount(() => {
 .lb-frame img { display: block; max-width: 94vw; max-height: 82vh; object-fit: contain; cursor: zoom-in; user-select: none;
   transition: transform 220ms ease; }
 .lb-frame.zoomed img { cursor: grab; transition: none; }
+.lb-frame { position: relative; min-width: min(260px, 80vw); min-height: 160px; display: grid; place-items: center; }
+.lb-frame img.hidden { opacity: 0; }
+.lb-frame img { transition: transform 220ms ease, opacity 300ms ease; }
+/* the loader on the dark overlay: black Archie with a light outline */
+.lb-loading { position: absolute; inset: 0; --husky-outline: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7)); --snow-strong: #ffffff; --line: rgba(255, 255, 255, 0.22); }
 figcaption { color: #e9eef2; font-size: 15px; text-align: center; display: flex; flex-direction: column; gap: 2px; }
 .lb-meta { color: #9aa5b0; font-size: 13px; }
 .lb-btn { position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.12);

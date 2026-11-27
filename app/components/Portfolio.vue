@@ -14,8 +14,11 @@ function toggleLoaders() {
   else url.searchParams.delete('loaders')
   history.replaceState(null, '', url.toString().replace('loaders=', 'loaders'))
 }
-const other = computed(() => (props.lang === 'ru' ? '/en' : '/'))
+const other = computed(() => (props.lang === 'ru' ? '/en/' : '/'))
 const site = 'https://huskybites.dev'
+// The English page is en/index.html, and GitHub Pages answers /en with a redirect to /en/:
+// search engines get the final address everywhere (canonical, hreflang, og:url, links, sitemap).
+const pageUrl = computed(() => site + (props.lang === 'ru' ? '/' : '/en/'))
 
 // Photo: public/photo.webp (a square crop of photo.jpg); if it is missing, the initials are shown.
 const photoOk = ref(true)
@@ -40,7 +43,7 @@ useHead(() => ({
     { property: 'og:type', content: 'profile' },
     { property: 'og:title', content: t.value.title },
     { property: 'og:description', content: t.value.description },
-    { property: 'og:url', content: site + (props.lang === 'ru' ? '/' : '/en') },
+    { property: 'og:url', content: pageUrl.value },
     // link preview picture (Telegram, LinkedIn…): photo with the husky ears, in the page's language
     { property: 'og:image', content: `${site}/${props.lang === 'ru' ? 'og-ru' : 'og'}.png` },
     { property: 'og:image:width', content: '1200' },
@@ -51,9 +54,9 @@ useHead(() => ({
     { name: 'theme-color', content: '#2B3138' },
   ],
   link: [
-    { rel: 'canonical', href: site + (props.lang === 'ru' ? '/' : '/en') },
+    { rel: 'canonical', href: pageUrl.value },
     { rel: 'alternate', hreflang: 'ru', href: `${site}/` },
-    { rel: 'alternate', hreflang: 'en', href: `${site}/en` },
+    { rel: 'alternate', hreflang: 'en', href: `${site}/en/` },
     { rel: 'alternate', hreflang: 'x-default', href: `${site}/` },
   ],
   script: [{
@@ -62,8 +65,12 @@ useHead(() => ({
       '@context': 'https://schema.org',
       '@type': 'Person',
       name: t.value.name,
+      // both spellings, so a search for either name finds the page
+      alternateName: [ru.name, en.name, 'Mikhail Makovetsky'].filter((n) => n !== t.value.name),
       jobTitle: 'Full Stack Developer',
-      url: site,
+      url: pageUrl.value,
+      image: `${site}/photo.webp`,
+      description: t.value.description,
       email: `mailto:${contacts.email}`,
       address: { '@type': 'PostalAddress', addressLocality: 'Minsk', addressCountry: 'BY' },
       sameAs: [contacts.linkedin, contacts.github, contacts.telegram],
@@ -84,7 +91,7 @@ function cvClick() {
 <template>
   <div class="site">
     <header class="top">
-      <a class="brand" :href="lang === 'ru' ? '/' : '/en'" aria-label="HuskyBites">
+      <a class="brand" :href="lang === 'ru' ? '/' : '/en/'" aria-label="HuskyBites">
         <img v-if="stickerOk" class="brand-sticker" src="/logo-archie.png" alt="" width="44" height="44" @error="stickerOk = false">
         <svg v-else class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
           <path d="M5 19 L9 2 L18 11 Z" class="ear"/>

@@ -1,5 +1,7 @@
 User-agent: *
+# CVs carry a phone number: they are linked from the page, but not shown in search results
 Disallow: /cv.pdf
+Disallow: /cv-ru.pdf
 Disallow: /car/
 
 Sitemap: https://huskybites.dev/sitemap.xml
